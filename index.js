@@ -23,6 +23,9 @@ var lossMessage = document.querySelector('#game-lose-message');
 var lossText = document.querySelector('.lose-text');
 var winText = document.querySelector('.win-text');
 var winMessage = document.querySelector('#game-win-message');
+var totalGames = document.querySelector('#stats-total-games');
+var percentCorrect = document.querySelector('#stats-percent-correct');
+var averageGuesses = document.querySelector('#stats-average-guesses');
 
 // Event Listeners
 window.addEventListener('load', setGame);
@@ -100,6 +103,7 @@ function submitGuess() {
     errorMessage.innerText = '';
     compareGuess();
     if (checkForWin()) {
+      
       setTimeout(declareWinner, 1000);
     } else if (!checkLastRow()){
       changeRow();
@@ -177,6 +181,7 @@ function changeRow() {
 
 function declareWinner() {
   recordGameStats('win');
+  setStats();
   changeGameOverText();
   viewGameWinMessage();
   setTimeout(startNewGame, 4000);
@@ -184,6 +189,7 @@ function declareWinner() {
 
 function declareLoser() {
   recordGameStats('lose');
+  setStats();
   viewGameLossMessage();
   setTimeout(startNewGame, 4000);
 }
@@ -194,6 +200,16 @@ function recordGameStats(result) {
   } else {
     gamesPlayed.push({ solved: false, guesses: 6});
   }
+}
+
+function setStats() {
+  const correctGuesses = gamesPlayed.filter(game => game.solved);
+  const sumCorrectGuesses = correctGuesses.reduce((sumGuesses,game)=> sumGuesses + game.guesses, 0);
+  const averageCorrectGuesses = sumCorrectGuesses/correctGuesses.length;
+  totalGames.innerText = gamesPlayed.length;
+  
+  percentCorrect.innerText = correctGuesses.length*100/gamesPlayed.length;
+  averageGuesses.innerText = averageCorrectGuesses;
 }
 
 function changeGameOverText() {
@@ -248,6 +264,8 @@ function viewGame() {
   viewRulesButton.classList.remove('active');
   viewStatsButton.classList.remove('active');
 }
+
+
 
 function viewStats() {
   letterKey.classList.add('hidden');

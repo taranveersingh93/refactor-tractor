@@ -2,7 +2,8 @@
 var winningWord = '';
 var currentRow = 1;
 var guess = '';
-var gamesPlayed = [];
+var gamesPlayed;
+let lastGame;
 
 // Query Selectors
 var inputs = document.querySelectorAll('input');
@@ -51,6 +52,7 @@ function setGame() {
   currentRow = 1;
   setWords();
   updateInputPermissions();
+  getStats();
 }
 
 function getRandomWord() {
@@ -59,14 +61,13 @@ function getRandomWord() {
 }
 
 function updateInputPermissions() {
-  for(var i = 0; i < inputs.length; i++) {
-    if(!inputs[i].id.includes(`-${currentRow}-`)) {
-      inputs[i].disabled = true;
+  inputs.forEach(input => {
+    if (!input.id.includes(`-${currentRow}-`)) {
+      input.disabled = true;
     } else {
-      inputs[i].disabled = false;
+      input.disabled = false;
     }
-  }
-
+  })
   inputs[0].focus();
 }
 
@@ -181,7 +182,7 @@ function changeRow() {
 
 function declareWinner() {
   recordGameStats('win');
-  setStats();
+  getStats();
   changeGameOverText();
   viewGameWinMessage();
   setTimeout(startNewGame, 4000);
@@ -189,22 +190,23 @@ function declareWinner() {
 
 function declareLoser() {
   recordGameStats('lose');
-  setStats();
+  getStats();
   viewGameLossMessage();
   setTimeout(startNewGame, 4000);
 }
 
 function recordGameStats(result) {
   if (result === 'win') {
-    gamesPlayed.push({ solved: true, guesses: currentRow });
+    lastGame = { solved: true, guesses: currentRow }
   } else {
-    gamesPlayed.push({ solved: false, guesses: 6});
+    lastGame = { solved: false, guesses: 6 }
   }
+  postStats();
 }
 
 function setStats() {
   const correctGuesses = gamesPlayed.filter(game => game.solved);
-  const sumCorrectGuesses = correctGuesses.reduce((sumGuesses,game)=> sumGuesses + game.guesses, 0);
+  const sumCorrectGuesses = correctGuesses.reduce((sumGuesses,game)=> sumGuesses + game.numGuesses, 0);
   const averageCorrectGuesses = sumCorrectGuesses/correctGuesses.length;
   totalGames.innerText = gamesPlayed.length;
   
